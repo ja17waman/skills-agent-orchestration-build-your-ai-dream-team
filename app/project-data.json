@@ -1,0 +1,39 @@
+{
+  "projects": [
+    {
+      "name": "Customer Onboarding Refresh",
+      "owner": "Maya Chen",
+      "status": "On track",
+      "recentActivity": "Completed usability testing with 12 customers; the team is incorporating the final feedback.",
+      "priority": "High"
+    },
+    {
+      "name": "Analytics Workspace",
+      "owner": "Jordan Lee",
+      "status": "In progress",
+      "recentActivity": "The event pipeline is connected in staging, and dashboard review is scheduled for next week.",
+      "priority": "High"
+    },
+    {
+      "name": "Mobile App Reliability",
+      "owner": "Priya Patel",
+      "status": "At risk",
+      "recentActivity": "Crash rates are improving, but one third-party SDK issue still needs a mitigation plan.",
+      "priority": "High"
+    },
+    {
+      "name": "Design System Adoption",
+      "owner": "Alex Rivera",
+      "status": "On track",
+      "recentActivity": "Two product teams have migrated their core flows to the new component library.",
+      "priority": "Medium"
+    },
+    {
+      "name": "Billing Portal Updates",
+      "owner": "Sam Okafor",
+      "status": "Complete",
+      "recentActivity": "The updated invoice history shipped successfully and has passed the post-release checks.",
+      "priority": "Low"
+    }
+  ]
+}

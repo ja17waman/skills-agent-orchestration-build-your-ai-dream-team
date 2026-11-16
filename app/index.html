@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="A clear, at-a-glance view of project health, activity, and priorities.">
+    <title>Project Pulse</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <main class="dashboard">
+      <header class="dashboard-header">
+        <div>
+          <p class="eyebrow">Portfolio overview</p>
+          <h1 class="dashboard-title">Project Pulse</h1>
+          <p class="dashboard-subtitle">A snapshot of what’s moving, what needs attention, and what’s next.</p>
+        </div>
+      </header>
+
+      <section aria-label="Project summary">
+        <div class="summary-grid">
+          <article class="summary-card">
+            <span>Total projects</span>
+            <strong id="total-projects">—</strong>
+          </article>
+          <article class="summary-card">
+            <span>On track</span>
+            <strong id="on-track-projects">—</strong>
+          </article>
+          <article class="summary-card">
+            <span>Need attention</span>
+            <strong id="attention-projects">—</strong>
+          </article>
+          <article class="summary-card">
+            <span>High priority</span>
+            <strong id="high-priority-projects">—</strong>
+          </article>
+        </div>
+      </section>
+
+      <section aria-labelledby="projects-heading">
+        <h2 class="section-heading" id="projects-heading">Your projects</h2>
+        <p id="load-message" role="status" aria-live="polite">Loading project data…</p>
+        <div class="project-grid" id="project-list" aria-busy="true"></div>
+      </section>
+    </main>
+
+    <script>
+      const projectList = document.querySelector("#project-list");
+      const loadMessage = document.querySelector("#load-message");
+      const statusKey = (value) => value.trim().toLowerCase().replace(/\s+/g, "-");
+      const updateMetric = (id, value) => {
+        document.querySelector(`#${id}`).textContent = String(value);
+      };
+
+      function createProjectCard(project) {
+        const card = document.createElement("article");
+        card.className = "project-card";
+
+        const header = document.createElement("header");
+        header.className = "project-card-header";
+        const identity = document.createElement("div");
+        const name = document.createElement("h3");
+        name.className = "project-name";
+        name.textContent = project.name;
+        const owner = document.createElement("p");
+        owner.className = "project-owner";
+        owner.textContent = `Owner: ${project.owner}`;
+        identity.append(name, owner);
+
+        const status = document.createElement("span");
+        status.className = "project-status";
+        status.dataset.status = statusKey(project.status);
+        status.textContent = project.status;
+        header.append(identity, status);
+
+        const priority = document.createElement("p");
+        priority.className = "project-priority";
+        priority.dataset.priority = statusKey(project.priority);
+        priority.textContent = `Priority: ${project.priority}`;
+        const activity = document.createElement("p");
+        activity.className = "project-activity";
+        activity.textContent = project.recentActivity;
+        card.append(header, priority, activity);
+        return card;
+      }
+
+      async function loadProjects() {
+        try {
+          const response = await fetch("project-data.json");
+          if (!response.ok) {
+            throw new Error(`The project data request failed (${response.status}).`);
+          }
+          const data = await response.json();
+          if (!Array.isArray(data.projects) || data.projects.some((project) =>
+            !project || !["name", "owner", "status", "recentActivity", "priority"]
+              .every((field) => typeof project[field] === "string")
+          )) {
+            throw new Error("The project data is missing required project details.");
+          }
+
+          const projects = data.projects;
+          projectList.replaceChildren(...projects.map(createProjectCard));
+          updateMetric("total-projects", projects.length);
+          updateMetric("on-track-projects", projects.filter((project) =>
+            statusKey(project.status) === "on-track"
+          ).length);
+          updateMetric("attention-projects", projects.filter((project) =>
+            ["at-risk", "blocked", "off-track", "delayed"].includes(statusKey(project.status))
+          ).length);
+          updateMetric("high-priority-projects", projects.filter((project) =>
+            statusKey(project.priority) === "high"
+          ).length);
+          projectList.setAttribute("aria-busy", "false");
+          loadMessage.textContent = projects.length
+            ? `Showing ${projects.length} projects.`
+            : "No projects are available yet.";
+        } catch (error) {
+          projectList.setAttribute("aria-busy", "false");
+          loadMessage.setAttribute("role", "alert");
+          loadMessage.textContent = `Unable to load project data. ${error.message} Please check project-data.json and refresh the page.`;
+        }
+      }
+
+      loadProjects();
+    </script>
+  </body>
+</html>
